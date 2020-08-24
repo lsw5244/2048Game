@@ -7,7 +7,7 @@ public class GameManager : MonoBehaviour
 
     public GameObject[] n;
 
-    int x, y;
+    int x, y, j;
     Vector3 firstPos, gap;
     bool wait, move;
 
@@ -53,24 +53,54 @@ public class GameManager : MonoBehaviour
                 if (gap.y > 0 && gap.x > -0.5f && gap.x < 0.5f)
                 {
                     //Debug.Log("위");
+                    for(int x = 0; x <= 3; x++)
+                    {
+                        for(int y = 0; y <= 2; y++)
+                        {
+                            for(int i = 3; i >= y+1; i--)
+                            {
+                                MoveOrCombine(x, i - 1, x, i);
+                            }
+                        }
+                    }
                 }
                 // 아래
                 else if (gap.y < 0 && gap.x > -0.5f && gap.x < 0.5f)
                 {
                     //Debug.Log("아래");
+                    for(int x = 0; x <= 3; x++)
+                    {
+                        for(int y = 3; y >= 1; y--)
+                        {
+                            for(int i = 0; i <= y-1; i++)
+                            {
+                                MoveOrCombine(x, i + 1, x, i);
+                            }
+                        }
+                    }
                 }
                 // 오른쪽으로 >
                 else if (gap.x > 0 && gap.y > -0.5f && gap.y < 0.5f)
                 {
                     //Debug.Log("오른쪽");
+                    for(int y = 0; y <= 3; y++)
+                    {
+                        for(int x = 0; x <= 2; x++)
+                        {
+                            for(int i = 3; i >= x+1; i--)
+                            {
+                                MoveOrCombine(i - 1, y, i, y);
+                            }
+                        }
+                    }
                 }
                 // 왼쪽 <
                 else if (gap.x < 0 && gap.y > -0.5f && gap.y < 0.5f)
                 {
                     //Debug.Log("왼쪽");
-                    for(y = 0; y <= 3; y++)
+                    for(int y = 0; y <= 3; y++)
                     {
-                        for(x = 3; x >= 1; x--)
+                        for(int x = 3; x >= 1; x--)
                         {
                             for(int i = 0; i <= x-1; i++)
                             {
@@ -80,11 +110,26 @@ public class GameManager : MonoBehaviour
                     }
                 }
                 else return;
-                // 터치 했을 때 움직임이 있었으면 새로운 숫자 스폰시킴
+                // 터치 했을 때 움직임이 있었으면 새로운 숫자 스폰시킴 (드레그의 모든 처리가 끝냈을 때)
                 if(move)
                 {
                     Spawn();
                     move = false;
+                    // Combine테그 떼어주기
+                    for(int i = 0; i <= 3; i++)
+                    {
+                        for(int j = 0; j <= 3; j++)
+                        {
+                            if(square[i, j] == null)
+                            {
+                                continue;
+                            }
+                            if(square[i, j].tag == "Combine")
+                            {
+                                square[i, j].tag = "Untagged";
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -98,9 +143,29 @@ public class GameManager : MonoBehaviour
             //square[x1, y1].transform.position = Vector3.MoveTowards(square[x1, y1].transform.position,
             //   new Vector3(-1.8f + 1.2f * x2, -1.8f + 1.2f * y2, 0), 0.1f);
             move = true;
-            square[x1, y1].GetComponent<Move>().Moveing(x2, y2);
+            square[x1, y1].GetComponent<Move>().Moveing(x2, y2, false);
             square[x2, y2] = square[x1, y1];
             square[x1, y1] = null;
+        }
+
+        // 같은 수 일때 결합하기
+        if (square[x1, y1] != null && square[x2, y2] != null && square[x1,y1].name == square[x2,y2].name
+            && square[x1, y1].tag != "Combine" && square[x2, y2].tag != "Combine")
+        {
+            move = true;
+            for(j = 0; j <= 16; j++)
+            {
+                if(square[x2, y2].name == n[j].name + "(Clone)")
+                {
+                    break;
+                }
+            }
+            square[x1, y1].GetComponent<Move>().Moveing(x2, y2, true);
+            Destroy(square[x2, y2]);
+            square[x1, y1] = null;
+            square[x2, y2] = Instantiate(n[j + 1], new Vector3(-1.8f + 1.2f * x2, -1.8f + 1.2f * y2, 0), Quaternion.identity);
+            square[x2, y2].tag = "Combine";
+            square[x2, y2].GetComponent<Animator>().SetTrigger("Combine");
         }
     }
 
