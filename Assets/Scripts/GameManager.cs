@@ -6,12 +6,15 @@ public class GameManager : MonoBehaviour
 {
 
     public GameObject[] n;
+    public GameObject quit;
 
-    int x, y, j;
+    int x, y, j, l;
     Vector3 firstPos, gap;
-    bool wait, move;
+    bool wait, move, isGameOver;
 
     GameObject[,] square = new GameObject[4, 4];
+
+
 
     void Start()
     {
@@ -25,6 +28,11 @@ public class GameManager : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.Escape))
         {
             Application.Quit();
+        }
+
+        if(isGameOver)
+        {
+            return;
         }
 
         // 처음 터치 한 위치 저장  // 터치 한손으로 && 터치발생상태 == 터치시작
@@ -115,6 +123,8 @@ public class GameManager : MonoBehaviour
                 {
                     Spawn();
                     move = false;
+                    // 빈 칸의 개수를 저장 할 변수
+                    int k = 0;
                     // Combine테그 떼어주기
                     for(int i = 0; i <= 3; i++)
                     {
@@ -122,6 +132,8 @@ public class GameManager : MonoBehaviour
                         {
                             if(square[i, j] == null)
                             {
+                                // 비어있는 칸 저장  // 칸이 가득 차면 k가 0이 됨
+                                k++;
                                 continue;
                             }
                             if(square[i, j].tag == "Combine")
@@ -130,6 +142,43 @@ public class GameManager : MonoBehaviour
                             }
                         }
                     }
+                    // 비어있는 칸이 0개일때 게임오버 검사
+                    if (k == 0)
+                    {
+                        // 인접한 타일에 같은 수가 있는 개수를 저장하는 변수
+                        l = 0;
+                        // 가로, 세로 같은 블럭이 있으면 l이 0이 됨 (게임오버)
+                        // 오른쪽에 같은 블럭이 있는지 확인
+                        for (int y = 0; y <= 3; y++)
+                        {
+                            for (int x = 0; x <= 2; x++)
+                            {
+                                if (square[x, y].name == square[x + 1, y].name)
+                                {
+                                    l++;
+                                }
+                            }
+                        }
+                        // 위쪽에 같은 블럭이 있는지 확인
+                        for (int x = 0; x <= 3; x++)
+                        {
+                            for (int y = 0; y <= 2; y++)
+                            {
+                                if (square[x, y].name == square[x, y + 1].name)
+                                {
+                                    l++;
+                                }
+                            }
+                        }
+                        // 게임 오버
+                        if (l == 0)
+                        {
+                            isGameOver = true;
+                            quit.SetActive(true);
+                            return;
+                        }
+                    }
+
                 }
             }
         }
