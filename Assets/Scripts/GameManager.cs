@@ -2,24 +2,28 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
 
     public GameObject[] n;
     public GameObject quit;
 
-    int x, y, j, l;
+    int x, y, j;
     Vector3 firstPos, gap;
     bool wait, move, isGameOver;
 
     GameObject[,] square = new GameObject[4, 4];
 
+    public Text currentScore, bestScore, plus;
 
+    int score;
 
     void Start()
     {
         Spawn();
         Spawn();
+        bestScore.text = (PlayerPrefs.GetInt("BestScore")).ToString();
     }
 
     void Update()
@@ -125,6 +129,26 @@ public class GameManager : MonoBehaviour
                     move = false;
                     // 빈 칸의 개수를 저장 할 변수
                     int k = 0;
+                    int l = 0;
+
+                    // 점수 추가
+                    if(score > 0)
+                    {
+                        // plus 애니메이션
+                        plus.text = "+" + score.ToString() + "     ";
+                        plus.GetComponent<Animator>().SetTrigger("PlusBack");
+                        plus.GetComponent<Animator>().SetTrigger("Plus");
+                        // 점수 더하기
+                        currentScore.text = (int.Parse(currentScore.text) + score).ToString();
+                        if(PlayerPrefs.GetInt("BestScore", 0) < int.Parse(currentScore.text))
+                        {
+                            PlayerPrefs.SetInt("BestScore", int.Parse(currentScore.text));
+                        }
+
+                        bestScore.text = (PlayerPrefs.GetInt("BestScore")).ToString();
+                        score = 0;
+                    }
+
                     // Combine테그 떼어주기
                     for(int i = 0; i <= 3; i++)
                     {
@@ -215,12 +239,15 @@ public class GameManager : MonoBehaviour
             square[x2, y2] = Instantiate(n[j + 1], new Vector3(-1.8f + 1.2f * x2, -1.8f + 1.2f * y2, 0), Quaternion.identity);
             square[x2, y2].tag = "Combine";
             square[x2, y2].GetComponent<Animator>().SetTrigger("Combine");
+            // 점수 저장
+            score += (int)Mathf.Pow(2, j+2);
         }
     }
 
     // 다시 하기
     public void Restart()
     {
+        Debug.Log("RESTART");
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
