@@ -22,9 +22,9 @@ public class Move : MonoBehaviour
         _x2 = x2;
         _y2 = y2;
         _combine = combine;
-        transform.position = Vector3.MoveTowards(transform.position, new Vector3(-1.8f + 1.2f * x2, -1.8f + 1.2f * y2, 0), 0.3f);
+        transform.position = Vector3.MoveTowards(transform.position, new Vector3(-1.865f + 1.245f * x2, -1.45f + 1.24f * y2, 0), 0.3f);
         // 목적지에 도착 하면 업데이트의 moving 작동 그만하도록 함
-        if(transform.position == new Vector3(-1.8f + 1.2f * x2, -1.8f + 1.2f * y2, 0))
+        if(transform.position == new Vector3(-1.865f + 1.245f * x2, -1.45f + 1.24f * y2, 0))
         {
             move = false;
             if(combine)
